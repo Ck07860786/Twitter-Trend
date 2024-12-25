@@ -1,10 +1,11 @@
-const puppeteer = require('puppeteer');
+const puppeteer = require('puppeteer-core');
+const chromium = require('chrome-aws-lambda');
 const { MongoClient } = require('mongodb');
 const uuid = require('uuid');
 const os = require('os');
-require('dotenv').config(); // Load environment variables
+require('dotenv').config(); 
 
-const mongoURI = process.env.MONGO_URI; // MongoDB URI from .env
+const mongoURI = process.env.MONGO_URI; 
 const dbName = 'TwitterTrends';
 
 async function scrapeTwitterTrends() {
@@ -13,27 +14,28 @@ async function scrapeTwitterTrends() {
     const db = client.db(dbName);
     const collection = db.collection('trendingTopics');
 
-    const browser = await puppeteer.launch({ headless: false }); // Set to false for debugging
+    // Launch browser using chrome-aws-lambda settings
+    const browser = await puppeteer.launch({
+        headless: false,
+        args: chromium.args,
+        executablePath: await chromium.executablePath,
+    });
     const page = await browser.newPage();
 
     try {
         // Log in to Twitter
         await page.goto('https://twitter.com/login', { waitUntil: 'networkidle2' });
 
-        // Enter username
         await page.waitForSelector('input[autocomplete="username"]', { timeout: 10000 });
         await page.type('input[autocomplete="username"]', process.env.TWITTER_USERNAME);
         await page.keyboard.press('Enter');
 
-        // Enter password
         await page.waitForSelector('input[autocomplete="current-password"]', { timeout: 10000 });
         await page.type('input[autocomplete="current-password"]', process.env.TWITTER_PASSWORD);
         await page.keyboard.press('Enter');
 
-        // Wait for the homepage to load
         await page.waitForNavigation({ waitUntil: 'networkidle2' });
 
-        // Wait for the trends section
         await page.waitForSelector('[data-testid="primaryColumn"]', { timeout: 30000 });
 
         // Scrape trends
@@ -44,10 +46,6 @@ async function scrapeTwitterTrends() {
                 return [];
             }
 
-            // Log the structure for debugging
-            console.log(trendContainer.innerHTML);
-
-            // Extract trending topics
             const trendElements = trendContainer.querySelectorAll('span');
             if (!trendElements.length) {
                 console.error('No trend elements found');
@@ -91,4 +89,4 @@ async function scrapeTwitterTrends() {
     }
 }
 
-module.exports = scrapeTwitterTrends;  
+module.exports = scrapeTwitterTrends;
