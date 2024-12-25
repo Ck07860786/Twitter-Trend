@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'https://twitter-trend-nu.vercel.app/api/trends';
+const API_URL = 'http://localhost:5000/api/trends';
 
 export const scrapeTrends = async () => {
     try {
