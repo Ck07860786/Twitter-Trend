@@ -38,7 +38,7 @@ async function scrapeTwitterTrends() {
 
         const page = await browser.newPage();
 
-        // Catch frame detachment by retrying on error
+       
         page.on('framenavigated', () => {
             console.log('Frame navigated');
         });
@@ -46,20 +46,20 @@ async function scrapeTwitterTrends() {
         try {
             await page.goto('https://twitter.com/login', { waitUntil: 'networkidle2' });
 
-            // Enter username and proceed
+          
             await page.waitForSelector('input[autocomplete="username"]', { timeout: 10000 });
             await page.type('input[autocomplete="username"]', process.env.TWITTER_USERNAME);
             await page.keyboard.press('Enter');
 
-            // Enter password and proceed
+            
             await page.waitForSelector('input[autocomplete="current-password"]', { timeout: 10000 });
             await page.type('input[autocomplete="current-password"]', process.env.TWITTER_PASSWORD);
             await page.keyboard.press('Enter');
 
-            // Wait for the main content to load after login
+          
             await page.waitForNavigation({ waitUntil: 'networkidle2' });
 
-            // Check for the trending section and extract trends
+       
             await page.waitForSelector('[data-testid="primaryColumn"]', { timeout: 30000 });
             const trends = await page.evaluate(() => {
                 const trendContainer = document.querySelector('[data-testid="primaryColumn"]');
@@ -76,7 +76,7 @@ async function scrapeTwitterTrends() {
                 throw new Error('No trends found. Verify Twitter DOM structure.');
             }
 
-            // Prepare and save data to MongoDB
+           
             const networkInterfaces = os.networkInterfaces();
             const ipAddress = Object.values(networkInterfaces)
                 .flat()
