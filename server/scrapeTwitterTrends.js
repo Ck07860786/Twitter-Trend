@@ -16,7 +16,7 @@ async function scrapeTwitterTrends() {
 
     // Launch browser using chrome-aws-lambda settings
     const browser = await puppeteer.launch({
-        headless: false,
+        headless: true,
         args: chromium.args,
         executablePath: await chromium.executablePath,
     });
